@@ -2234,6 +2234,18 @@ MonoBehaviour:
   - {fileID: 1532216513}
   - {fileID: 168020165}
   - {fileID: 600499717}
+  butttonlist1:
+  - {fileID: 286386752}
+  - {fileID: 45663379}
+  - {fileID: 1707621948}
+  butttonlist2:
+  - {fileID: 412298898}
+  - {fileID: 612992186}
+  - {fileID: 1774887710}
+  butttonlist3:
+  - {fileID: 1532216513}
+  - {fileID: 168020165}
+  - {fileID: 600499717}
   gameOverPanel: {fileID: 1441080278}
   gameOverPanelText: {fileID: 469115404}
   restartGameButton: {fileID: 157788615}
