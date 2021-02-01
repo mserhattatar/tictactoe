@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -56,7 +54,7 @@ public class GameController : MonoBehaviour
         playerMove = true;
         delay = 10;
         delayBool = true;
-        ikiKisi = GameManager.instance.ikiKisilik;
+        ikiKisi = GameManager.instance.twoPlayer;
     }
     private void Update()
     {
@@ -66,7 +64,6 @@ public class GameController : MonoBehaviour
             if (delay >= 20 && delayBool)
             {
                 delayBool = false;
-                // value = Random.Range(0, 8);
                 value = FindBestMove(buttonList);
                 if(buttonList[value].GetComponentInParent<Button>().interactable == true)
                 {
@@ -259,31 +256,44 @@ public class GameController : MonoBehaviour
         return false;
     }
 
-    int minimax(Text[] _buttonList,int depth, bool isMax)
+    int[] minimax(Text[] _buttonList,int depth, bool isMax)
     {
         string _winner = FindWinner();
-        
+        int[] _returSearch;
         // If Maximizer has won the game return his/her
         // evaluated score
         if (computerSide == _winner)
-            return 10;
+        {
+            _returSearch = new int[] {10, depth};
+            return _returSearch;
+        }          
 
         // If Minimizer has won the game return his/her
         // evaluated score
         if (playerSide == _winner)
-            return -10;
+        {
+            _returSearch = new int[] { -10, depth };
+            return _returSearch;
+        }
         // If there are no more moves and no winner then
         // it is a tie
         if (!FindEmptyText(_buttonList))
-            return 0;
+        {
+            _returSearch = new int[] { 0, depth };
+            return _returSearch;
+        }
 
-        //if (depth == 5)
-        //    return 0;
+        //if (depth == 2)
+        //{
+        //    _returSearch = new int[] { 0, depth };
+        //    return _returSearch;
+        //}
 
         // If this maximizer's move
         if (isMax)
         {
             int best = -1000;
+            int[] _returnBest= new int[] {best, depth};
             // Traverse all cells
             for (int i = 0; i < _buttonList.Length; i++)
             {   
@@ -296,20 +306,20 @@ public class GameController : MonoBehaviour
 
                     // Call minimax recursively and choose
                     // the maximum value
-                    best = Math.Max(best, minimax(_buttonList, depth +1, !isMax));
-
+                    _returnBest[0] = Math.Max(_returnBest[0], minimax(_buttonList, depth +1, !isMax)[0]);
+                    _returnBest[1] = minimax(_buttonList, depth + 1, !isMax)[1];
                     // Undo the move
                     _buttonList[i].text = "";
-                }
-                
+                }                
             }
-            return best;
+            return _returnBest;
         }
 
         // If this minimizer's move
         else
         {
             int best = 1000;
+            int[] _returnBest = new int[] { best, depth };
             for (int i = 0; i < _buttonList.Length; i++)
             {
                 // Check if cell is empty
@@ -320,23 +330,24 @@ public class GameController : MonoBehaviour
 
                     // Call minimax recursively and choose
                     // the maximum value
-                    best = Math.Min(best, minimax(_buttonList,depth +1, !isMax));
+                    _returnBest[0] = Math.Min(_returnBest[0], minimax(_buttonList, depth + 1, !isMax)[0]);
+                    _returnBest[1] = minimax(_buttonList, depth + 1, !isMax)[1];
 
 
                     // Undo the move
                     _buttonList[i].text = "";
                 }
             }          
-            return best;
+            return _returnBest;
         }
     }
 
     // This will return the best possible move for the player
     public int FindBestMove(Text[] _buttonlist)
     {
-        int bestVal = -1000;
+        //int bestVal = -1000;
+        int[] bestVal = new int[] { -1000, +1000 };
         int bestMove = -1;
-
 
         // Traverse all cells, evaluate minimax function for
         // all empty cells. And return the cell with optimal
@@ -353,7 +364,7 @@ public class GameController : MonoBehaviour
 
                 // Call minimax recursively and choose
                 // the maximum value
-                int moveVal = minimax(_buttonlist, 0, false);
+                int[] moveVal = minimax(_buttonlist, 0, false);
 
                 // Undo the move
                 _buttonlist[i].text = "";
@@ -361,17 +372,16 @@ public class GameController : MonoBehaviour
                 // If the value of the current move is
                 // more than the best value, then update
                 // best/
-               
-                if (moveVal > bestVal)
+                Debug.Log("i= "+ i +"  moveVal = " + moveVal[0].ToString()+ " " +  moveVal[1].ToString());
+                if (moveVal[0] > bestVal[0] /*&& moveVal[1] <= bestVal[1]*/)
                 {
-                    bestVal = moveVal;
+                    bestVal[0] = moveVal[0];
+                    //bestVal[1] = moveVal[1];
                     bestMove = i;
                 }
-
             }
         }
-        Debug.Log("The value of the best Move is =  " + bestMove.ToString() + "// best val" + bestVal.ToString());
-
+        Debug.Log( "The value of the best Move is =  " + bestMove.ToString() + "// best val" + bestVal[0].ToString());
         return bestMove;
     }
 }

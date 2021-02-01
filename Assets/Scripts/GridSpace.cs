@@ -17,7 +17,7 @@ public class GridSpace : MonoBehaviour
             button.interactable = false;
             gameController.EndTrun();
         } 
-        else if(GameManager.instance.ikiKisilik)
+        else if(GameManager.instance.twoPlayer)
         {
             buttonText.text = gameController.GetComputerSide();
             button.interactable = false;
