@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,6 +28,7 @@ public class GameController : MonoBehaviour
     public GameObject gameOverPanel;
     public Text gameOverPanelText;  
     public GameObject restartGameButton;
+    public GameObject restartGameButton2;
     public Player playerX;
     public Player playerO;
     public PlayerColor activePlayerColor;
@@ -38,6 +40,8 @@ public class GameController : MonoBehaviour
     private int value;
     public bool playerMove;
     public float delay;
+    public bool delayBool;
+    public bool ikiKisi;
 
 
     private void Awake()
@@ -46,19 +50,24 @@ public class GameController : MonoBehaviour
         gameOverPanel.SetActive(false);
         moveCount = 0;
         restartGameButton.SetActive(false);
+        if (restartGameButton2 != null)
+            restartGameButton2.SetActive(false);
         SetPlayerButtons(true);
         playerMove = true;
         delay = 10;
+        delayBool = true;
+        ikiKisi = GameManager.instance.ikiKisilik;
     }
     private void Update()
     {
-        if(playerMove == false)
+        if(!ikiKisi && playerMove == false)
         {
             delay += delay * Time.deltaTime;
-            if (delay >= 20)
+            if (delay >= 20 && delayBool)
             {
+                delayBool = false;
                 // value = Random.Range(0, 8);
-                value = FindBestMove();
+                value = FindBestMove(buttonList);
                 if(buttonList[value].GetComponentInParent<Button>().interactable == true)
                 {
                     buttonList[value].text = GetComputerSide();
@@ -150,6 +159,7 @@ public class GameController : MonoBehaviour
         {
             ChangeSides();
             delay = 10;
+            delayBool = true;
         }       
     }
 
@@ -174,6 +184,8 @@ public class GameController : MonoBehaviour
             SetGameOverText(winningPlayer + " Wins!");
 
         restartGameButton.SetActive(true);
+        if (restartGameButton2 != null)
+            restartGameButton2.SetActive(true);
     }
 
     void ChangeSides()
@@ -202,6 +214,8 @@ public class GameController : MonoBehaviour
         moveCount = 0;
         gameOverPanel.SetActive(false);
         restartGameButton.SetActive(false);
+        if (restartGameButton2 != null)
+            restartGameButton2.SetActive(false);
         SetPlayerButtons(true);
         SetPlayerColorsInactive();
         startInfo.SetActive(true);
@@ -248,23 +262,24 @@ public class GameController : MonoBehaviour
     int minimax(Text[] _buttonList,int depth, bool isMax)
     {
         string _winner = FindWinner();
-        if (depth == 3)
-            return 0;
+        
         // If Maximizer has won the game return his/her
         // evaluated score
-        if (_winner != null && computerSide == _winner)
+        if (computerSide == _winner)
             return 10;
 
         // If Minimizer has won the game return his/her
         // evaluated score
-        if (_winner != null && playerSide == _winner)
+        if (playerSide == _winner)
             return -10;
         // If there are no more moves and no winner then
         // it is a tie
         if (!FindEmptyText(_buttonList))
             return 0;
 
-        Debug.Log("emptytext = s" + FindEmptyText(_buttonList));
+        //if (depth == 5)
+        //    return 0;
+
         // If this maximizer's move
         if (isMax)
         {
@@ -275,15 +290,13 @@ public class GameController : MonoBehaviour
                 // Check if cell is empty
                 if (_buttonList[i].text == "")
                 {
-                    Debug.Log("isMax!!! = ");
 
                     // Make the move
                     _buttonList[i].text = computerSide;
 
                     // Call minimax recursively and choose
                     // the maximum value
-                    best = System.Math.Max(best, minimax(_buttonList, depth +1, !isMax));
-                    Debug.Log("isMax best = " + best);
+                    best = Math.Max(best, minimax(_buttonList, depth +1, !isMax));
 
                     // Undo the move
                     _buttonList[i].text = "";
@@ -307,8 +320,7 @@ public class GameController : MonoBehaviour
 
                     // Call minimax recursively and choose
                     // the maximum value
-                    best = System.Math.Min(best, minimax(_buttonList,depth +1, !isMax));
-                    Debug.Log("isMin best = " + best);
+                    best = Math.Min(best, minimax(_buttonList,depth +1, !isMax));
 
 
                     // Undo the move
@@ -320,7 +332,7 @@ public class GameController : MonoBehaviour
     }
 
     // This will return the best possible move for the player
-    public int FindBestMove()
+    public int FindBestMove(Text[] _buttonlist)
     {
         int bestVal = -1000;
         int bestMove = -1;
@@ -330,22 +342,21 @@ public class GameController : MonoBehaviour
         // all empty cells. And return the cell with optimal
         // value.
 
-        for (int i = 0; i < buttonList.Length; i++)
+        for (int i = 0; i < _buttonlist.Length; i++)
         {
            
             // Check if cell is empty
-            if (buttonList[i].text == "")
+            if (_buttonlist[i].text == "")
             {
-                Debug.Log(buttonList[i].text);
                 // Make the move
-                buttonList[i].text = computerSide;
+                _buttonlist[i].text = computerSide;
 
                 // Call minimax recursively and choose
                 // the maximum value
-                int moveVal = minimax(buttonList, 0, true);
+                int moveVal = minimax(_buttonlist, 0, false);
 
                 // Undo the move
-                buttonList[i].text = "";
+                _buttonlist[i].text = "";
 
                 // If the value of the current move is
                 // more than the best value, then update

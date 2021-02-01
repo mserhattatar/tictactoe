@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 
@@ -18,7 +16,13 @@ public class GridSpace : MonoBehaviour
             buttonText.text = gameController.GetPlayerSide();
             button.interactable = false;
             gameController.EndTrun();
-        }       
+        } 
+        else if(GameManager.instance.ikiKisilik)
+        {
+            buttonText.text = gameController.GetComputerSide();
+            button.interactable = false;
+            gameController.EndTrun();
+        }
     }
     public void SetGameControllerReference(GameController controller)
     {
