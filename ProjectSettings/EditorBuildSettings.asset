@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ikikisi.unity
     guid: f3f68cabe95f95645b8e78d4eb9bc9d4
+  - enabled: 1
+    path: Assets/Scenes/MultiPlayerScene.unity
+    guid: ceac94556c7e760468d2e18de63deb85
   m_configObjects: {}

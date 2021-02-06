@@ -4,16 +4,22 @@ using UnityEngine.UI;
 
 public class MainMenuManager : MonoBehaviour
 {
-    public int _aiChallenge;
-    public Dropdown langDropdown;
+    public static MainMenuManager instance;
+    public GameObject multiplayerPanel;
+    //public int _aiChallenge;
 
-    private void Start()
+    //private void Start()
+    //{
+    //    _aiChallenge = 3;
+    //}
+
+    private void Awake()
     {
-        _aiChallenge = 3;
-    }
+        instance = this;
+    }      
     public void TekKisilik()
     {
-        GameManager.instance.aiChallenge = _aiChallenge;
+        //GameManager.instance.aiChallenge = _aiChallenge;
         GameManager.instance.twoPlayer = false;
         SceneManager.LoadScene(1);
     }
@@ -22,11 +28,5 @@ public class MainMenuManager : MonoBehaviour
         GameManager.instance.twoPlayer = true;
         SceneManager.LoadScene(2);
     }
-    public void DropDownAiChallenge()
-    {
-        var _LangDropdown = langDropdown.GetComponent<Dropdown>();
-        _aiChallenge = 3 +_LangDropdown.value;
-        Debug.Log(_aiChallenge);
-
-    }
+   
 }

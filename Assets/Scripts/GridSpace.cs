@@ -24,6 +24,21 @@ public class GridSpace : MonoBehaviour
             gameController.EndTrun();
         }
     }
+    public void SetSpaceMultiPlayer()
+    {
+        if (gameController.playerMove == true  )
+        {
+            buttonText.text = gameController.GetPlayerSide();
+            button.interactable = false;
+            gameController.EndTrun();
+        }
+        else if (GameManager.instance.twoPlayer)
+        {
+            buttonText.text = gameController.GetComputerSide();
+            button.interactable = false;
+            gameController.EndTrun();
+        }
+    }
     public void SetGameControllerReference(GameController controller)
     {
         gameController = controller;

@@ -259,36 +259,25 @@ public class GameController : MonoBehaviour
     int[] minimax(Text[] _buttonList,int depth, bool isMax)
     {
         string _winner = FindWinner();
-        int[] _returSearch;
         // If Maximizer has won the game return his/her
         // evaluated score
         if (computerSide == _winner)
         {
-            _returSearch = new int[] {10, depth};
-            return _returSearch;
+            return new int[] {10, depth};
         }          
 
         // If Minimizer has won the game return his/her
         // evaluated score
         if (playerSide == _winner)
         {
-            _returSearch = new int[] { -10, depth };
-            return _returSearch;
+            return new int[] { -10, depth };
         }
         // If there are no more moves and no winner then
         // it is a tie
         if (!FindEmptyText(_buttonList))
         {
-            _returSearch = new int[] { 0, depth };
-            return _returSearch;
+            return new int[] { 0, depth };
         }
-
-        //if (depth == 2)
-        //{
-        //    _returSearch = new int[] { 0, depth };
-        //    return _returSearch;
-        //}
-
         // If this maximizer's move
         if (isMax)
         {
@@ -303,11 +292,16 @@ public class GameController : MonoBehaviour
 
                     // Make the move
                     _buttonList[i].text = computerSide;
+                    
+                    
 
                     // Call minimax recursively and choose
                     // the maximum value
-                    _returnBest[0] = Math.Max(_returnBest[0], minimax(_buttonList, depth +1, !isMax)[0]);
-                    _returnBest[1] = minimax(_buttonList, depth + 1, !isMax)[1];
+                    var returnMiniMax = minimax(_buttonList, depth + 1, !isMax);
+                    if(returnMiniMax[0] > _returnBest[0])
+                        _returnBest = returnMiniMax;
+
+                    //Debug.Log("Derinlik = " + depth + ", oyuncu = " + computerSide + ", kutu = " + i + "  returnbest =" + _returnBest[0]);
                     // Undo the move
                     _buttonList[i].text = "";
                 }                
@@ -330,10 +324,10 @@ public class GameController : MonoBehaviour
 
                     // Call minimax recursively and choose
                     // the maximum value
-                    _returnBest[0] = Math.Min(_returnBest[0], minimax(_buttonList, depth + 1, !isMax)[0]);
-                    _returnBest[1] = minimax(_buttonList, depth + 1, !isMax)[1];
-
-
+                    var returnMiniMax = minimax(_buttonList, depth + 1, !isMax);
+                    if (returnMiniMax[0] < _returnBest[0])
+                        _returnBest = returnMiniMax;
+                    //Debug.Log("Derinlik = " + depth + ", oyuncu = " + playerSide + ", kutu = " + i + "  returnbest =" + _returnBest[0]);
                     // Undo the move
                     _buttonList[i].text = "";
                 }
@@ -346,7 +340,7 @@ public class GameController : MonoBehaviour
     public int FindBestMove(Text[] _buttonlist)
     {
         //int bestVal = -1000;
-        int[] bestVal = new int[] { -1000, +1000 };
+        int[] bestVal = new int[] { -1000, +100 };
         int bestMove = -1;
 
         // Traverse all cells, evaluate minimax function for
@@ -364,7 +358,7 @@ public class GameController : MonoBehaviour
 
                 // Call minimax recursively and choose
                 // the maximum value
-                int[] moveVal = minimax(_buttonlist, 0, false);
+                int[] newVal = minimax(_buttonlist, 0, false);
 
                 // Undo the move
                 _buttonlist[i].text = "";
@@ -372,13 +366,14 @@ public class GameController : MonoBehaviour
                 // If the value of the current move is
                 // more than the best value, then update
                 // best/
-                Debug.Log("i= "+ i +"  moveVal = " + moveVal[0].ToString()+ " " +  moveVal[1].ToString());
-                if (moveVal[0] > bestVal[0] /*&& moveVal[1] <= bestVal[1]*/)
+
+                Debug.Log(newVal[0] + ", " + bestVal[0] + ", " + newVal[1] + ", " + bestVal[1]);
+                if (newVal[0] > bestVal[0] || newVal[0] == bestVal[0] && newVal[1] < bestVal[1])
                 {
-                    bestVal[0] = moveVal[0];
-                    //bestVal[1] = moveVal[1];
+                    bestVal = newVal;
                     bestMove = i;
                 }
+                Debug.Log("i= " + i + "  moveVal = " + newVal[0].ToString() + " movedeph" + newVal[1].ToString());
             }
         }
         Debug.Log( "The value of the best Move is =  " + bestMove.ToString() + "// best val" + bestVal[0].ToString());
