@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,12 +20,13 @@ public class PlayerColor
 
 public class GameController : MonoBehaviour
 {
-
-    private int moveCount;
+    private string _playerSide;
+    private string _computerSide;
+    private int _value, _moveCount;
 
     public Text[] buttonList;
     public GameObject gameOverPanel;
-    public Text gameOverPanelText;  
+    public Text gameOverPanelText;
     public GameObject restartGameButton;
     public GameObject restartGameButton2;
     public Player playerX;
@@ -33,20 +35,14 @@ public class GameController : MonoBehaviour
     public PlayerColor inactivePlayerColor;
     public GameObject startInfo;
 
-    private string playerSide;
-    private string computerSide;
-    private int value;
-    public bool playerMove;
+    public bool playerMove, delayBool, twoPlayer;
     public float delay;
-    public bool delayBool;
-    public bool ikiKisi;
-
 
     private void Awake()
-    {        
+    {
         SetGameControllerReferenceOnButtons();
         gameOverPanel.SetActive(false);
-        moveCount = 0;
+        _moveCount = 0;
         restartGameButton.SetActive(false);
         if (restartGameButton2 != null)
             restartGameButton2.SetActive(false);
@@ -54,52 +50,54 @@ public class GameController : MonoBehaviour
         playerMove = true;
         delay = 10;
         delayBool = true;
-        ikiKisi = GameManager.instance.twoPlayer;
+        twoPlayer = GameManager.instance.twoPlayer;
     }
+
     private void Update()
     {
-        if(!ikiKisi && playerMove == false)
+        if (!twoPlayer && playerMove == false)
         {
             delay += delay * Time.deltaTime;
             if (delay >= 20 && delayBool)
             {
                 delayBool = false;
-                value = FindBestMove(buttonList);
-                if(buttonList[value].GetComponentInParent<Button>().interactable == true)
+                _value = FindBestMove(buttonList);
+                if (buttonList[_value].GetComponentInParent<Button>().interactable == true)
                 {
-                    buttonList[value].text = GetComputerSide();
-                    buttonList[value].GetComponentInParent<Button>().interactable = false;
-                    EndTrun();
+                    buttonList[_value].text = GetComputerSide();
+                    buttonList[_value].GetComponentInParent<Button>().interactable = false;
+                    EndTurn();
                 }
             }
         }
     }
 
-    void SetGameControllerReferenceOnButtons()
+    private void SetGameControllerReferenceOnButtons()
     {
-        for(int i=0; i<buttonList.Length; i++)
+        foreach (var t in buttonList)
         {
-            buttonList[i].GetComponentInParent<GridSpace>().SetGameControllerReference(this);
+            t.GetComponentInParent<GridSpace>().SetGameControllerReference(this);
         }
     }
 
     public void SetStartingSide(string startingSide)
     {
-        playerSide = startingSide;
-        if(playerSide == "X")
+        _playerSide = startingSide;
+        if (_playerSide == "X")
         {
-            computerSide = "O";
+            _computerSide = "O";
             SetPlayerColors(playerX, playerO);
         }
         else
         {
-            computerSide = "X";
+            _computerSide = "X";
             SetPlayerColors(playerO, playerX);
         }
+
         StartGame();
     }
 
-    void StartGame()
+    private void StartGame()
     {
         SetBoardInteractable(true);
         SetPlayerButtons(false);
@@ -108,59 +106,68 @@ public class GameController : MonoBehaviour
 
     public string GetPlayerSide()
     {
-        return playerSide;
-    }
-    public string GetComputerSide()
-    {
-        return computerSide;
+        return _playerSide;
     }
 
-    public string FindWinner()
+    public string GetComputerSide()
+    {
+        return _computerSide;
+    }
+
+    private string FindWinner()
     {
         //check horizontal equality
         for (var i = 0; i < 7; i = i + 3)
         {
-            if (buttonList[i].text != "" && buttonList[i].text == buttonList[i + 1].text && buttonList[i + 1].text == buttonList[i + 2].text)
+            if (buttonList[i].text != "" && buttonList[i].text == buttonList[i + 1].text &&
+                buttonList[i + 1].text == buttonList[i + 2].text)
             {
                 return buttonList[i].text;
             }
         }
+
         //check vertical equality
         for (var i = 0; i < 3; i++)
         {
-            if (buttonList[i].text != "" && buttonList[i].text == buttonList[i + 3].text && buttonList[i + 3].text == buttonList[i + 6].text)
+            if (buttonList[i].text != "" && buttonList[i].text == buttonList[i + 3].text &&
+                buttonList[i + 3].text == buttonList[i + 6].text)
             {
                 return buttonList[i].text;
             }
-        }       
+        }
+
         //check cross equality 
-        if (buttonList[0].text != "" && buttonList[0].text == buttonList[4].text && buttonList[4].text == buttonList[8].text)
+        if (buttonList[0].text != "" && buttonList[0].text == buttonList[4].text &&
+            buttonList[4].text == buttonList[8].text)
         {
             return buttonList[4].text;
         }
-        if (buttonList[2].text != "" && buttonList[2].text == buttonList[4].text && buttonList[4].text == buttonList[6].text)
+
+        if (buttonList[2].text != "" && buttonList[2].text == buttonList[4].text &&
+            buttonList[4].text == buttonList[6].text)
         {
-            return buttonList[4].text;           
+            return buttonList[4].text;
         }
+
         return null;
     }
 
-    public void EndTrun()
+    public void EndTurn()
     {
-        moveCount++;
-        var _winner = FindWinner();
+        _moveCount++;
+        var winner = FindWinner();
 
-        if ((_winner == null && moveCount >= 9) || _winner != null)
-            GameEnd(_winner);       
+        if ((winner == null && _moveCount >= 9) || winner != null)
+            GameEnd(winner);
         else
         {
             ChangeSides();
             delay = 10;
             delayBool = true;
-        }       
+        }
     }
 
-    void SetPlayerColors(Player newPlayer, Player oldPlayer)
+    private void SetPlayerColors(Player newPlayer, Player oldPlayer)
     {
         newPlayer.panel.color = activePlayerColor.panelColor;
         newPlayer.text.color = activePlayerColor.textColor;
@@ -168,7 +175,7 @@ public class GameController : MonoBehaviour
         oldPlayer.text.color = inactivePlayerColor.textColor;
     }
 
-    void GameEnd(string winningPlayer)
+    private void GameEnd(string winningPlayer)
     {
         SetBoardInteractable(false);
 
@@ -185,7 +192,7 @@ public class GameController : MonoBehaviour
             restartGameButton2.SetActive(true);
     }
 
-    void ChangeSides()
+    private void ChangeSides()
     {
         //playerSide = (playerSide == "X") ? "O" : "X";
         playerMove = (playerMove == true) ? false : true;
@@ -200,7 +207,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    void SetGameOverText(string value)
+    private void SetGameOverText(string value)
     {
         gameOverPanel.SetActive(true);
         gameOverPanelText.text = value;
@@ -208,7 +215,7 @@ public class GameController : MonoBehaviour
 
     public void RestartGame()
     {
-        moveCount = 0;
+        _moveCount = 0;
         gameOverPanel.SetActive(false);
         restartGameButton.SetActive(false);
         if (restartGameButton2 != null)
@@ -219,24 +226,27 @@ public class GameController : MonoBehaviour
         playerMove = true;
         delay = 10;
 
-        for (int i = 0; i < buttonList.Length; i++)
+        foreach (var t in buttonList)
         {
-            buttonList[i].text = "";
-        }        
-    }
-    public void SetBoardInteractable(bool toggle)
-    {
-        for (int i = 0; i < buttonList.Length; i++)
-        {
-            buttonList[i].GetComponentInParent<Button>().interactable = toggle;
+            t.text = "";
         }
     }
-    void SetPlayerButtons(bool toggle)
+
+    private void SetBoardInteractable(bool toggle)
+    {
+        foreach (var t in buttonList)
+        {
+            t.GetComponentInParent<Button>().interactable = toggle;
+        }
+    }
+
+    private void SetPlayerButtons(bool toggle)
     {
         playerX.button.interactable = toggle;
         playerO.button.interactable = toggle;
     }
-    void SetPlayerColorsInactive()
+
+    private void SetPlayerColorsInactive()
     {
         playerX.panel.color = inactivePlayerColor.panelColor;
         playerX.text.color = inactivePlayerColor.textColor;
@@ -244,102 +254,94 @@ public class GameController : MonoBehaviour
         playerO.text.color = inactivePlayerColor.textColor;
     }
 
-    private bool FindEmptyText(Text[] _buttonList)
+    private static bool FindEmptyText(IEnumerable<Text> buttonTextList)
     {
-        for (var i = 0; i < _buttonList.Length; i++)
-        {
-            if (_buttonList[i].text == "")
-            {
-                return true;
-            }
-        }
-        return false;
+        return buttonTextList.Any(t => t.text == "");
     }
 
-    int[] minimax(Text[] _buttonList,int depth, bool isMax)
+    private int[] Minimax(IReadOnlyList<Text> buttonList, int depth, bool isMax)
     {
-        string _winner = FindWinner();
+        string winner = FindWinner();
         // If Maximizer has won the game return his/her
         // evaluated score
-        if (computerSide == _winner)
+        if (_computerSide == winner)
         {
-            return new int[] {10, depth};
-        }          
+            return new int[] { 10, depth };
+        }
 
         // If Minimizer has won the game return his/her
         // evaluated score
-        if (playerSide == _winner)
+        if (_playerSide == winner)
         {
             return new int[] { -10, depth };
         }
+
         // If there are no more moves and no winner then
         // it is a tie
-        if (!FindEmptyText(_buttonList))
+        if (!FindEmptyText(buttonList))
         {
             return new int[] { 0, depth };
         }
+
         // If this maximizer's move
         if (isMax)
         {
             int best = -1000;
-            int[] _returnBest= new int[] {best, depth};
+            int[] returnBest = new int[] { best, depth };
             // Traverse all cells
-            for (int i = 0; i < _buttonList.Length; i++)
-            {   
+            for (int i = 0; i < buttonList.Count; i++)
+            {
                 // Check if cell is empty
-                if (_buttonList[i].text == "")
+                if (buttonList[i].text == "")
                 {
-
                     // Make the move
-                    _buttonList[i].text = computerSide;
-                    
-                    
+                    buttonList[i].text = _computerSide;
+
 
                     // Call minimax recursively and choose
                     // the maximum value
-                    var returnMiniMax = minimax(_buttonList, depth + 1, !isMax);
-                    if(returnMiniMax[0] > _returnBest[0])
-                        _returnBest = returnMiniMax;
+                    var returnMiniMax = Minimax(buttonList, depth + 1, !isMax);
+                    if (returnMiniMax[0] > returnBest[0])
+                        returnBest = returnMiniMax;
 
-                    //Debug.Log("Derinlik = " + depth + ", oyuncu = " + computerSide + ", kutu = " + i + "  returnbest =" + _returnBest[0]);
                     // Undo the move
-                    _buttonList[i].text = "";
-                }                
+                    buttonList[i].text = "";
+                }
             }
-            return _returnBest;
+
+            return returnBest;
         }
 
         // If this minimizer's move
         else
         {
             int best = 1000;
-            int[] _returnBest = new int[] { best, depth };
-            for (int i = 0; i < _buttonList.Length; i++)
+            int[] returnBest = new int[] { best, depth };
+            foreach (var t in buttonList)
             {
                 // Check if cell is empty
-                if (_buttonList[i].text == "")
+                if (t.text == "")
                 {
                     // Make the move
-                    _buttonList[i].text = playerSide;
+                    t.text = _playerSide;
 
                     // Call minimax recursively and choose
                     // the maximum value
-                    var returnMiniMax = minimax(_buttonList, depth + 1, !isMax);
-                    if (returnMiniMax[0] < _returnBest[0])
-                        _returnBest = returnMiniMax;
-                    //Debug.Log("Derinlik = " + depth + ", oyuncu = " + playerSide + ", kutu = " + i + "  returnbest =" + _returnBest[0]);
+                    var returnMiniMax = Minimax(buttonList, depth + 1, !isMax);
+                    if (returnMiniMax[0] < returnBest[0])
+                        returnBest = returnMiniMax;
                     // Undo the move
-                    _buttonList[i].text = "";
+                    t.text = "";
                 }
-            }          
-            return _returnBest;
+            }
+
+            return returnBest;
         }
     }
 
     // This will return the best possible move for the player
-    public int FindBestMove(Text[] _buttonlist)
+    private int FindBestMove(Text[] buttonTextList)
     {
-        //int bestVal = -1000;
         int[] bestVal = new int[] { -1000, +100 };
         int bestMove = -1;
 
@@ -347,36 +349,33 @@ public class GameController : MonoBehaviour
         // all empty cells. And return the cell with optimal
         // value.
 
-        for (int i = 0; i < _buttonlist.Length; i++)
+        for (var i = 0; i < buttonTextList.Length; i++)
         {
-           
             // Check if cell is empty
-            if (_buttonlist[i].text == "")
+            if (buttonTextList[i].text == "")
             {
                 // Make the move
-                _buttonlist[i].text = computerSide;
+                buttonTextList[i].text = _computerSide;
 
                 // Call minimax recursively and choose
                 // the maximum value
-                int[] newVal = minimax(_buttonlist, 0, false);
+                int[] newVal = Minimax(buttonTextList, 0, false);
 
                 // Undo the move
-                _buttonlist[i].text = "";
+                buttonTextList[i].text = "";
 
                 // If the value of the current move is
                 // more than the best value, then update
                 // best/
 
-                Debug.Log(newVal[0] + ", " + bestVal[0] + ", " + newVal[1] + ", " + bestVal[1]);
                 if (newVal[0] > bestVal[0] || newVal[0] == bestVal[0] && newVal[1] < bestVal[1])
                 {
                     bestVal = newVal;
                     bestMove = i;
                 }
-                Debug.Log("i= " + i + "  moveVal = " + newVal[0].ToString() + " movedeph" + newVal[1].ToString());
             }
         }
-        Debug.Log( "The value of the best Move is =  " + bestMove.ToString() + "// best val" + bestVal[0].ToString());
+
         return bestMove;
     }
 }

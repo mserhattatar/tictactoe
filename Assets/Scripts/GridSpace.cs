@@ -7,41 +7,42 @@ public class GridSpace : MonoBehaviour
     public Button button;
     public Text buttonText;
 
-    private GameController gameController;
+    private GameController _gameController;
 
     public void SetSpace()
     {
-        if(gameController.playerMove == true)
+        if (_gameController.playerMove == true)
         {
-            buttonText.text = gameController.GetPlayerSide();
+            buttonText.text = _gameController.GetPlayerSide();
             button.interactable = false;
-            gameController.EndTrun();
-        } 
-        else if(GameManager.instance.twoPlayer)
-        {
-            buttonText.text = gameController.GetComputerSide();
-            button.interactable = false;
-            gameController.EndTrun();
-        }
-    }
-    public void SetSpaceMultiPlayer()
-    {
-        if (gameController.playerMove == true  )
-        {
-            buttonText.text = gameController.GetPlayerSide();
-            button.interactable = false;
-            gameController.EndTrun();
+            _gameController.EndTurn();
         }
         else if (GameManager.instance.twoPlayer)
         {
-            buttonText.text = gameController.GetComputerSide();
+            buttonText.text = _gameController.GetComputerSide();
             button.interactable = false;
-            gameController.EndTrun();
+            _gameController.EndTurn();
         }
     }
-    public void SetGameControllerReference(GameController controller)
+
+    public void SetSpaceMultiPlayer()
     {
-        gameController = controller;
+        if (_gameController.playerMove == true)
+        {
+            buttonText.text = _gameController.GetPlayerSide();
+            button.interactable = false;
+            _gameController.EndTurn();
+        }
+        else if (GameManager.instance.twoPlayer)
+        {
+            buttonText.text = _gameController.GetComputerSide();
+            button.interactable = false;
+            _gameController.EndTurn();
+        }
     }
 
+    public void SetGameControllerReference(GameController controller)
+    {
+        _gameController = controller;
+    }
 }
