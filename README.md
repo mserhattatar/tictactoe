@@ -1,4 +1,4 @@
-# TicTacToe Game /Mini-Max Algorithm
+# TicTacToe Game / Mini-Max Algorithm
 
  Have developed the Tictactoe game in Unity with C# language. I developed this game to practice the minimax algorithm to create AI logic. 
 This game is the basic tictactoe game. 2 users can play together on the same screen or user can play against AI. For now Minimax algorithm always wins the game.
